@@ -6,12 +6,15 @@
   <title>Virtual Hug</title>
   <style>
     :root {
-      --bg-start: #ffe4ec;
-      --bg-end: #ffd6a5;
-      --card: #fff7fb;
-      --text: #4b2e39;
-      --button: #ff7aa2;
-      --button-hover: #ff5d8d;
+      --bg-start: #ffe2cf;
+      --bg-mid: #ffd8de;
+      --bg-end: #ffeab5;
+      --card: #fffaf6;
+      --text: #55363f;
+      --accent: #ff7a86;
+      --accent-strong: #ef5c71;
+      --accent-soft: #ffd5dc;
+      --button-text: #fff9f5;
     }
 
     * {
@@ -23,18 +26,63 @@
       min-height: 100vh;
       display: grid;
       place-items: center;
-      background: linear-gradient(160deg, var(--bg-start), var(--bg-end));
+      background: radial-gradient(circle at 20% 20%, #fff2e3 0%, transparent 40%),
+        radial-gradient(circle at 80% 15%, #ffe4ef 0%, transparent 45%),
+        linear-gradient(155deg, var(--bg-start), var(--bg-mid) 52%, var(--bg-end));
       font-family: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
       color: var(--text);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .ambient-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 0;
+    }
+
+    .ambient-heart {
+      position: absolute;
+      bottom: -40px;
+      color: rgba(255, 122, 134, 0.35);
+      font-size: var(--size, 16px);
+      animation: drift var(--dur, 13s) linear infinite;
+      animation-delay: var(--delay, 0s);
+      left: var(--x, 50%);
+      opacity: 0;
+      transform: translateY(0) scale(0.95);
     }
 
     .card {
+      position: relative;
+      z-index: 1;
       width: min(92vw, 520px);
-      padding: 1.25rem;
-      border-radius: 20px;
+      padding: 1.2rem 1.2rem 1.35rem;
+      border-radius: 22px;
       background: var(--card);
-      box-shadow: 0 12px 28px rgba(100, 36, 63, 0.16);
+      box-shadow: 0 14px 30px rgba(126, 65, 73, 0.18),
+        0 0 0 1px rgba(255, 255, 255, 0.35) inset;
       text-align: center;
+      animation: breathe 5.2s ease-in-out infinite;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: -30% -10% auto;
+      height: 80px;
+      background: radial-gradient(circle, rgba(255, 185, 190, 0.5), transparent 65%);
+      filter: blur(10px);
+      pointer-events: none;
+    }
+
+    h1 {
+      margin: 0.25rem 0 0.95rem;
+      font-size: clamp(1.1rem, 3.8vw, 1.35rem);
+      letter-spacing: 0.02em;
     }
 
     img {
@@ -42,50 +90,335 @@
       max-width: 480px;
       height: auto;
       display: block;
-      margin: 0;
+      margin: 0 auto;
       border-radius: 14px;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      box-shadow: 0 8px 22px rgba(111, 56, 79, 0.15);
+    }
+
+    img:hover {
+      transform: translateY(-2px) scale(1.01);
+      box-shadow: 0 12px 24px rgba(111, 56, 79, 0.2);
+    }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+      position: relative;
     }
 
     button {
-      margin-top: 1rem;
       border: 0;
       border-radius: 999px;
-      padding: 0.7rem 1.2rem;
-      font-size: 1rem;
+      padding: 0.7rem 1.12rem;
+      font-size: 0.98rem;
       font-weight: 700;
-      color: #fff;
-      background: var(--button);
+      color: var(--button-text);
+      background: var(--accent);
       cursor: pointer;
-      transition: background-color 0.2s ease;
+      transition: transform 0.18s ease, background-color 0.2s ease, box-shadow 0.22s ease;
+      box-shadow: 0 7px 16px rgba(236, 98, 114, 0.28);
     }
 
     button:hover {
-      background: var(--button-hover);
+      background: var(--accent-strong);
+      transform: translateY(-1px);
+      box-shadow: 0 9px 18px rgba(236, 98, 114, 0.35);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    button.secondary {
+      color: #704151;
+      background: var(--accent-soft);
+      box-shadow: 0 6px 14px rgba(209, 132, 146, 0.32);
+    }
+
+    button.secondary:hover {
+      background: #ffc5ce;
+    }
+
+    .status {
+      margin-top: 1rem;
+      font-size: 0.92rem;
+      color: #89626e;
+      min-height: 1.25rem;
     }
 
     p {
-      margin: 0.9rem 0 0;
+      margin: 0.85rem 0 0;
       font-size: 1.2rem;
       font-weight: 700;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.35s ease, transform 0.35s ease;
     }
 
     .hidden {
       display: none;
     }
+
+    p.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .burst-heart {
+      position: fixed;
+      width: 12px;
+      height: 12px;
+      left: 0;
+      top: 0;
+      pointer-events: none;
+      background: #ff7a86;
+      transform: translate(-50%, -50%) rotate(45deg);
+      animation: pop 700ms ease-out forwards;
+      z-index: 2;
+    }
+
+    .burst-heart::before,
+    .burst-heart::after {
+      content: "";
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      background: #ff7a86;
+      border-radius: 50%;
+    }
+
+    .burst-heart::before {
+      left: -6px;
+      top: 0;
+    }
+
+    .burst-heart::after {
+      left: 0;
+      top: -6px;
+    }
+
+    .pulse {
+      animation: warmPulse 350ms ease-out;
+    }
+
+    @keyframes drift {
+      0% {
+        opacity: 0;
+        transform: translate3d(0, 0, 0) scale(0.95);
+      }
+      10% {
+        opacity: 0.8;
+      }
+      100% {
+        opacity: 0;
+        transform: translate3d(var(--driftX, 12px), -112vh, 0) scale(1.15);
+      }
+    }
+
+    @keyframes breathe {
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-4px);
+      }
+    }
+
+    @keyframes pop {
+      to {
+        opacity: 0;
+        transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) rotate(45deg) scale(0.35);
+      }
+    }
+
+    @keyframes warmPulse {
+      0% {
+        transform: scale(1);
+      }
+      55% {
+        transform: scale(1.03);
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    @media (max-width: 640px) {
+      .card {
+        padding: 1rem 0.95rem 1.2rem;
+      }
+
+      .ambient-heart {
+        font-size: 13px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .ambient-heart,
+      .card,
+      .pulse,
+      .burst-heart {
+        animation: none !important;
+      }
+
+      img,
+      p,
+      button {
+        transition: none;
+      }
+    }
   </style>
 </head>
 <body>
+  <div id="ambientLayer" class="ambient-layer" aria-hidden="true"></div>
   <main class="card">
-    <img src="Virtual-Hug.jpg" alt="Virtual hug" />
-    <button id="revealButton" type="button">点我</button>
-    <p id="message" class="hidden">无聊的话记得给猪打电话！</p>
+    <h1>给你一个温柔的虚拟抱抱</h1>
+    <img id="hugImage" src="Virtual-Hug.jpg" alt="Virtual hug cover" />
+    <div class="controls">
+      <button id="musicButton" type="button" class="secondary" aria-pressed="false">播放音乐</button>
+      <button id="revealButton" type="button">点我</button>
+    </div>
+    <div id="musicStatus" class="status" aria-live="polite">播放前调小音量或者戴上耳机哟</div>
+    <p id="message" class="hidden">记得给猪打电话！</p>
+    <audio id="bgm" src="./bgm.mp3" loop preload="auto"></audio>
   </main>
   <script>
+    const ambientLayer = document.getElementById("ambientLayer");
+    const musicButton = document.getElementById("musicButton");
     const revealButton = document.getElementById("revealButton");
+    const hugImage = document.getElementById("hugImage");
     const message = document.getElementById("message");
+    const musicStatus = document.getElementById("musicStatus");
+    const bgm = document.getElementById("bgm");
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const imageLoop = [
+      { src: "./Pigs.jpeg", alt: "Pigs cuddle", text: "大猪小猪贴贴" },
+      { src: "./Pigs2.heic", alt: "Pigs cuddle 2", text: "大猪小猪毛毛changchang贴贴" },
+      { src: "./Pigs3.jpeg", alt: "Pigs on train", text: "火车上的大猪小猪贴贴" },
+      { src: "./Pigs4.jpeg", alt: "Pigs at night club", text: "大猪小猪夜店贴贴" },
+      { src: "./Pigs5.heic", alt: "Pigs in activity room", text: "活动室里大猪小猪贴贴" },
+      { src: "./image.png", alt: "Virtual hug", text: "记得给猪打电话！" }
+    ];
+    let imageIndex = -1;
+
+    bgm.volume = 0.35;
+
+    function createAmbientHearts() {
+      const heartCount = window.innerWidth < 640 ? 12 : 18;
+
+      for (let i = 0; i < heartCount; i += 1) {
+        const heart = document.createElement("span");
+        heart.className = "ambient-heart";
+        heart.textContent = "❤";
+        heart.style.setProperty("--x", `${Math.random() * 96 + 2}%`);
+        heart.style.setProperty("--dur", `${10 + Math.random() * 8}s`);
+        heart.style.setProperty("--delay", `${Math.random() * -14}s`);
+        heart.style.setProperty("--size", `${12 + Math.random() * 14}px`);
+        heart.style.setProperty("--driftX", `${-16 + Math.random() * 32}px`);
+        ambientLayer.appendChild(heart);
+      }
+    }
+
+    function updateMusicState(isPlaying) {
+      musicButton.textContent = isPlaying ? "暂停音乐" : "播放音乐";
+      musicButton.setAttribute("aria-pressed", String(isPlaying));
+      musicStatus.textContent = isPlaying ? "正在播放：所以你睡了没.mp3" : "嘘～";
+    }
+
+    async function toggleMusic() {
+      if (bgm.paused) {
+        try {
+          await bgm.play();
+          updateMusicState(true);
+        } catch (error) {
+          updateMusicState(false);
+          musicStatus.textContent = "播放失败，请再点一次";
+        }
+      } else {
+        bgm.pause();
+        updateMusicState(false);
+      }
+    }
+
+    function burstHeartsAt(x, y, burstCount) {
+      if (reduceMotion) {
+        return;
+      }
+
+      for (let i = 0; i < burstCount; i += 1) {
+        const heart = document.createElement("span");
+        const angle = (Math.PI * 2 * i) / burstCount;
+        const distance = 28 + Math.random() * 38;
+        const offsetX = Math.cos(angle) * distance;
+        const offsetY = Math.sin(angle) * distance;
+
+        heart.className = "burst-heart";
+        heart.style.left = `${x}px`;
+        heart.style.top = `${y}px`;
+        heart.style.setProperty("--x", `${offsetX}px`);
+        heart.style.setProperty("--y", `${offsetY}px`);
+        document.body.appendChild(heart);
+
+        setTimeout(() => {
+          heart.remove();
+        }, 700);
+      }
+    }
+
+    if (!reduceMotion) {
+      createAmbientHearts();
+    }
+
+    musicButton.addEventListener("click", () => {
+      toggleMusic();
+    });
 
     revealButton.addEventListener("click", () => {
-      message.classList.toggle("hidden");
+      imageIndex = (imageIndex + 1) % imageLoop.length;
+      hugImage.src = imageLoop[imageIndex].src;
+      hugImage.alt = imageLoop[imageIndex].alt;
+      message.textContent = imageLoop[imageIndex].text;
+
+      if (message.classList.contains("hidden")) {
+        message.classList.remove("hidden");
+        requestAnimationFrame(() => {
+          message.classList.add("visible");
+        });
+      } else {
+        message.classList.remove("visible");
+        void message.offsetWidth;
+        message.classList.add("visible");
+      }
+
+      const buttonRect = revealButton.getBoundingClientRect();
+      const buttonCenterX = buttonRect.left + buttonRect.width / 2;
+      const buttonCenterY = buttonRect.top + buttonRect.height / 2;
+      const buttonBurstCount = window.innerWidth < 640 ? 8 : 12;
+      burstHeartsAt(buttonCenterX, buttonCenterY, buttonBurstCount);
+
+      revealButton.classList.remove("pulse");
+      void revealButton.offsetWidth;
+      revealButton.classList.add("pulse");
+    });
+
+    document.addEventListener("click", (event) => {
+      const target = event.target;
+
+      if (!(target instanceof Element) || target.closest(".card")) {
+        return;
+      }
+
+      const backgroundBurstCount = window.innerWidth < 640 ? 7 : 10;
+      burstHeartsAt(event.clientX, event.clientY, backgroundBurstCount);
+    });
+
+    bgm.addEventListener("ended", () => {
+      updateMusicState(false);
     });
   </script>
 </body>
